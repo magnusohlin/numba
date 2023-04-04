@@ -130,10 +130,15 @@ const onAnswer = (socket, roomCode, userId, answer, remainingTime) => {
   if (room) {
     const player = room.players.get(userId)
     if (player) {
+      // Return early if the player has already answered the question
+      if (player.answered) {
+        return
+      }
+
       player.answeredCorrectly = answer === room.currentQuestion.answer
       if (player.answeredCorrectly) {
         player.score += 100 + remainingTime * 10
-        player.timeAnswered = remainingTime * 1000// Store the remaining time
+        player.timeAnswered = remainingTime * 1000 // Store the remaining time
       } else {
         player.timeAnswered = -1 // Set -1 if the player didn't answer correctly
       }
