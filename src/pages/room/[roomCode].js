@@ -373,6 +373,7 @@ const Room = ({ socket }) => {
 
   useEffect(() => {
     if (gameStarted && timeRemaining <= 0) {
+      setHasAnswered(true)
       handleAnswer('no answer')
     }
 
