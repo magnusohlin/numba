@@ -20,17 +20,17 @@ const GameOptions = ({ gameOptions, setGameOptions }) => {
         <label htmlFor="type">Räknesätt</label>
         <select className={styles.select} value={gameOptions.type} onChange={handleTypeChange}>
           <option value="addition">Addition</option>
-          <option value="subtraction">Subtraction</option>
-          <option value="multiplication">Multiplication</option>
+          <option value="subtraction">Subtraktion</option>
+          <option value="multiplication">Multiplikation</option>
           <option value="division">Division</option>
-          <option value="mixed">Mixed</option>
+          <option value="mixed">Mixat</option>
         </select>
       </div>
       <div className={styles.gameOption}>
         <label htmlFor="level">Nivå</label>
         <select className={styles.select} value={gameOptions.level} onChange={handleLevelChange}>
-          <option value="1">Level 1</option>
-          <option value="2">Level 2</option>
+          <option value="1">Nivå 1</option>
+          <option value="2">Nivå 2</option>
         </select>
       </div>
     </div>
@@ -202,11 +202,7 @@ const Room = ({ socket }) => {
 
     if (selectedAnswer === currentQuestion.answer) {
       setShowSuccessConfetti(true)
-    } else {
-      console.log('Incorrect!')
     }
-
-    console.log('Emitting answer event:', roomCode, userId, selectedAnswer, timeRemaining)
     // Notify the server that the user has answered the question
     socket.emit('answer', roomCode, userId, selectedAnswer, timeRemaining)
     setHasAnswered(true)
@@ -222,20 +218,6 @@ const Room = ({ socket }) => {
 
     router.push('/')
   }
-
-  useEffect(() => {
-    if (!socket) return
-
-    const handleSocketConnected = (socketId) => {
-      console.log('Socket connected:', socketId)
-    }
-
-    socket.on('connected', handleSocketConnected)
-
-    return () => {
-      socket.off('connected', handleSocketConnected)
-    }
-  }, [socket])
 
   useEffect(() => {
     if (!socket) return
@@ -273,7 +255,6 @@ const Room = ({ socket }) => {
       }
 
       setIsRoomOwner(userId === ownerId)
-      console.log(`Room owner check: userId (${userId}) === ownerId (${ownerId})`)
     })
   }, [socket, roomCode, userId])
 
@@ -281,7 +262,6 @@ const Room = ({ socket }) => {
     if (!socket) return
 
     const handleQuestion = (question) => {
-      console.log(`Received question: ${JSON.stringify(question)}`)
       setCurrentQuestion(question)
     }
 

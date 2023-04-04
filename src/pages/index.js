@@ -61,7 +61,7 @@ const Home = ({ socket }) => {
       <div className={styles.home}>
         <div className={styles.homeContent}>
           <div className={styles.header}>
-            <h3>Välkommen till Numba</h3>
+            <h3 className={styles.headerTop}>Välkommen till Numba</h3>
             <h3>Ett lärorikt mattequiz</h3>
           </div>
           <div className={styles.tabWrapper}>

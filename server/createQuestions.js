@@ -21,11 +21,7 @@ const generateDistractors = (answer, type, level) => {
   const baseRange = level === 1 ? 2 : 10
   const distractors = new Set()
 
-  let iterations = 0
   while (distractors.size < 3) {
-    iterations++
-    console.log('answer', answer, 'type', type, 'level', level, 'max', max, 'baseRange', baseRange)
-    console.log('iterations', iterations, distractors.size)
     let distractor
 
     const adjustedRange = Math.max(Math.floor(answer * 0.5), baseRange, answer + 1)

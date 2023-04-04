@@ -15,13 +15,30 @@ import('@dicebear/collection').then((collection) => {
 })
 
 const app = express()
-app.use(cors()) // Enable CORS for Express
 const server = http.createServer(app)
+
+const allowedOrigins = [
+  'http://localhost:3000', // Example: your local development environment
+  'https://example.com' // Example: your production environment
+]
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Custom-Header']
+}
+
+app.use(cors(corsOptions)) // Enable CORS for Express with the custom configuration
+
 const io = new Server(server, {
-  cors: {
-    origin: '*', // Allow connections from all origins
-    methods: ['GET', 'POST']
-  }
+  cors: corsOptions
 })
 
 const generateRoomCode = () => {
@@ -54,6 +71,17 @@ const onJoinRoom = (socket, userId, roomCode, playerName, callback) => {
     return
   }
 
+  const existingPlayer = room.players.get(userId)
+  if (existingPlayer) {
+    // Rejoin the Socket.IO room
+    socket.join(roomCode)
+
+    // Send the room owner's socket ID to the user that just rejoined the room
+    socket.emit('roomOwner', room.ownerId)
+    callback(null, roomCode, room.ownerId, true) // Indicate that the user rejoined the room
+    return
+  }
+
   const seed = `${userId}-${Date.now()}`
   const avatarObj = createAvatar(funEmoji, { seed, radius: 10, colors: ['#C5F9CD', '#ECD3F9', '#FFFD9F', '#99E0E3'] })
   const avatar = avatarObj.toString()
@@ -69,7 +97,6 @@ const onJoinRoom = (socket, userId, roomCode, playerName, callback) => {
 
   // Send the room owner's socket ID to the user that just joined the room
   socket.emit('roomOwner', room.ownerId)
-  console.log(`User ${userId} joined room ${roomCode}, room owner: ${room.ownerId}`)
 
   callback(null, roomCode, room.ownerId)
 }
@@ -81,7 +108,6 @@ const onStartGame = (socket, userId, roomCode, gameOptions) => {
     const question = createQuestion(gameOptions.type, gameOptions.level)
     room.currentQuestion = question
     room.questionsAsked = 1
-    console.log(`Emitting question: ${JSON.stringify(question)}`)
     io.to(roomCode).emit('startGame', { question, timerDuration: 10000, questionsAsked: room.questionsAsked })
 
     room.remainingTime = 10000
@@ -100,7 +126,6 @@ const onStartGame = (socket, userId, roomCode, gameOptions) => {
 }
 
 const onAnswer = (socket, roomCode, userId, answer, remainingTime) => {
-  console.log(`Answer received. Room code: ${roomCode}, User ID: ${userId}, Answer: ${answer}, Remaining time: ${remainingTime}`) // Add this line
   const room = rooms.get(roomCode)
   if (room) {
     const player = room.players.get(userId)
@@ -168,25 +193,45 @@ const onAnswer = (socket, roomCode, userId, answer, remainingTime) => {
   }
 }
 
+// Not implemented client-side yet
+const onRejoinRoom = (socket, userId, roomCode, callback) => {
+  const room = rooms.get(roomCode)
+  if (!room) {
+    callback(new Error('Room not found'))
+    return
+  }
+
+  const player = room.players.get(userId)
+  if (!player) {
+    callback(new Error('Player not found'))
+    return
+  }
+
+  player.disconnected = false // Set the disconnected flag to false
+  socket.join(roomCode) // Rejoin the Socket.IO room
+
+  // Emit an updated player list to all clients in the room
+  const playerList = Array.from(room.players.values())
+  io.in(roomCode).emit('playerListUpdate', playerList)
+
+  callback(null, roomCode)
+}
+
 const onDisconnect = (socket, userId) => {
-  console.log('A user disconnected:', userId, socket.id)
   // Find the room where the user is a player
   const roomCode = findRoomByUserId(userId)
   if (roomCode) {
     const room = rooms.get(roomCode)
     if (room) {
-      // Remove the player from the room
-      room.players.delete(userId)
+      const player = room.players.get(userId)
+      if (player) {
+        // Set the disconnected flag for the player instead of removing them from the room
+        player.disconnected = true
+      }
 
       // Update the player list for all clients in the room
       const playerList = Array.from(room.players.values())
       io.in(roomCode).emit('playerListUpdate', playerList)
-
-      // If the disconnected user is the room owner, end the game and delete the room
-      if (userId === room.ownerId) {
-        io.to(roomCode).emit('endGame', { reason: 'ownerDisconnected' })
-        rooms.delete(roomCode)
-      }
     }
   }
 }
@@ -246,12 +291,8 @@ const findRoomByUserId = (userId) => {
 }
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id)
-
-  // Emit connected event
   socket.emit('connected', socket.id)
   const userId = socket.handshake.query.userId
-  console.log('A user connected:', userId, socket.id)
 
   socket.on('disconnect', () => {
     onDisconnect(socket, userId)
@@ -270,11 +311,9 @@ io.on('connection', (socket) => {
   })
 
   socket.on('startGame', (roomCode, gameOptions) => {
-    console.log('startGame event received')
     onStartGame(socket, userId, roomCode, gameOptions)
   })
 
-  console.log('Listening for answer event')
   socket.on('answer', (roomCode, userId, answer, remainingTime) => {
     onAnswer(socket, roomCode, userId, answer, remainingTime)
   })
@@ -287,7 +326,9 @@ io.on('connection', (socket) => {
     onGetRoomOwner(roomCode, callback)
   })
 
-  // Add other game-related events here
+  socket.on('rejoinRoom', (userId, roomCode, callback) => {
+    onRejoinRoom(socket, userId, roomCode, callback)
+  })
 })
 
 const PORT = process.env.PORT || 3001
