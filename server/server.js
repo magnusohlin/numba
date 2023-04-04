@@ -19,7 +19,7 @@ const server = http.createServer(app)
 
 const allowedOrigins = [
   'http://localhost:3000', // Example: your local development environment
-  'https://example.com' // Example: your production environment
+  'http://13.50.99.155/' // Example: your production environment
 ]
 
 const corsOptions = {
