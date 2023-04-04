@@ -329,9 +329,9 @@ const Room = ({ socket }) => {
         setShowSuccessConfetti(false)
         setCurrentQuestion(data.question)
         setTimeRemaining(data.question.timeLimit / 1000)
-        setShowLeaderboard(false)
         setHasAnswered(false)
         setSelectedIndex(-1)
+        setShowLeaderboard(false)
         setCurrentQuestionNumber(data.questionsAsked)
       }, 10000)
     }
@@ -354,9 +354,9 @@ const Room = ({ socket }) => {
       setTimeout(() => {
         setShowEndConfetti(false)
         setGameStarted(false)
-        setShowLeaderboard(false)
         setHasAnswered(false)
         setSelectedIndex(-1)
+        setShowLeaderboard(false)
         setCurrentQuestionNumber(1)
       }, 10000)
     }
