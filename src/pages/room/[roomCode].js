@@ -197,7 +197,7 @@ const Room = ({ socket }) => {
     }
   }, [gameStarted])
 
-  const handleAnswer = (selectedAnswer, selectedIndex) => {
+  const handleAnswer = (selectedAnswer, selectedIndex = -1) => {
     if (hasAnswered) return
 
     if (selectedAnswer === currentQuestion.answer) {
@@ -206,7 +206,10 @@ const Room = ({ socket }) => {
     // Notify the server that the user has answered the question
     socket.emit('answer', roomCode, userId, selectedAnswer, timeRemaining)
     setHasAnswered(true)
-    setSelectedIndex(selectedIndex)
+
+    if (selectedIndex !== -1) {
+      setSelectedIndex(selectedIndex)
+    }
   }
 
   const startGame = () => {
