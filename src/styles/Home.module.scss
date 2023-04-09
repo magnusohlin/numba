@@ -19,7 +19,7 @@
 
 .homeContent {
   display: grid;
-  grid-template-rows: 150px 1fr;
+  grid-template-rows: 200px 1fr;
 }
 
 .header {
@@ -28,6 +28,10 @@
   align-items: center;
   margin-bottom: 20px;
   flex-direction: column;
+}
+
+.logo {
+  margin: 0 0 10px;
 }
 
 .headerTop {

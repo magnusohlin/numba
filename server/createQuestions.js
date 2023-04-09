@@ -23,45 +23,69 @@ const generateDistractors = (answer, type, level) => {
 
   while (distractors.size < 3) {
     let distractor
+    let iterationCount = 0
 
-    const adjustedRange = Math.max(Math.floor(answer * 0.5), baseRange, answer + 1)
+    const adjustedRange = Math.max(
+      Math.floor(answer * 0.5),
+      baseRange,
+      answer + 1
+    )
 
-    switch (type) {
-      case 'addition':
-      case 'subtraction':
-        do {
-          distractor = answer + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
+    do {
+      iterationCount++
+
+      if (iterationCount > 20) {
+        break
+      }
+
+      switch (type) {
+        case 'addition':
+        case 'subtraction':
+          distractor =
+            answer +
+            (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
           if (type === 'subtraction' && (answer === 0 || answer === 1)) {
-            distractor = answer + Math.floor(Math.random() * (max - 1)) + 1
+            distractor =
+              answer + Math.floor(Math.random() * (max - 1)) + 1
           }
-        } while (distractors.has(distractor))
-        break
-      case 'multiplication':
-        do {
-          distractor = Math.round(answer * (1 + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange) / 10))
-        } while (distractors.has(distractor) || distractor === answer)
-        break
-      case 'division':
-        do {
+          break
+        case 'multiplication':
+          distractor = Math.round(
+            answer *
+              (1 +
+                (Math.floor(Math.random() * adjustedRange * 2) -
+                  adjustedRange) /
+                  10)
+          )
+          break
+        case 'division':
           const baseDistractor = Math.floor(Math.random() * max) + 1
-          distractor = baseDistractor + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
-        } while (distractors.has(distractor) || distractor === answer || !isWholeNumber(distractor))
-        break
+          distractor =
+            baseDistractor +
+            (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
+          break
+      }
+
+      if (!isWholeNumber(distractor)) {
+        distractor = Math.round(distractor)
+      }
+    } while (distractors.has(distractor) || distractor === answer)
+
+    if (iterationCount > 20 || (type === 'division' && !isWholeNumber(distractor))) {
+      break
     }
 
-    // Ensure distractor is within the valid range
     if (distractor < 1) {
       continue
     }
 
-    // Check if the distractor is a whole number, if not, adjust it
-    if (!isWholeNumber(distractor)) {
-      distractor = Math.round(distractor)
-    }
+    distractors.add(distractor)
+  }
 
-    // Check if the distractor is not equal to the answer
-    if (distractor !== answer) {
-      distractors.add(distractor)
+  while (distractors.size < 3) {
+    const randomWholeNumber = Math.floor(Math.random() * max) + 1
+    if (randomWholeNumber !== answer) {
+      distractors.add(randomWholeNumber)
     }
   }
 
@@ -79,25 +103,40 @@ const createQuestion = (type, level) => {
 
   switch (type) {
     case 'addition':
-      num1 = generateNumber(level)
-      num2 = generateNumber(level)
+      do {
+        num1 = generateNumber(level)
+        num2 = generateNumber(level)
+      } while (num1 === 0 && num2 === 0) // Ensure at least one number is not 0
+
       question = `${num1} + ${num2}`
       answer = num1 + num2
       break
     case 'subtraction':
       num1 = generateNumber(level)
       num2 = generateNumber(level)
+
+      // Ensure num1 and num2 are not equal to avoid answer being 0
+      while (num1 === num2) {
+        num2 = generateNumber(level)
+      }
+
       question = `${num1} - ${num2}`
       answer = num1 - num2
       break
     case 'multiplication':
-      num1 = generateNumber(level)
-      num2 = generateNumber(level)
+      do {
+        num1 = generateNumber(level)
+        num2 = generateNumber(level)
+      } while (num1 === 0 || num2 === 0) // Ensure neither number is 0
+
       question = `${num1} × ${num2}`
       answer = num1 * num2
       break
     case 'division':
-      num2 = generateNumber(level)
+      do {
+        num2 = generateNumber(level)
+      } while (num2 === 0) // Ensure num2 is not 0
+
       num1 = generateNumber(level, num2, type)
       question = `${num1} / ${num2}`
       answer = num1 / num2

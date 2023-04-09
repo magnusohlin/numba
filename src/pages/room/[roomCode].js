@@ -204,6 +204,7 @@ const Room = ({ socket }) => {
       setShowSuccessConfetti(true)
     }
     // Notify the server that the user has answered the question
+    console.log(roomCode, userId, selectedAnswer, timeRemaining)
     socket.emit('answer', roomCode, userId, selectedAnswer, timeRemaining)
     setHasAnswered(true)
 
@@ -262,20 +263,6 @@ const Room = ({ socket }) => {
   }, [socket, roomCode, userId])
 
   useEffect(() => {
-    if (!socket) return
-
-    const handleQuestion = (question) => {
-      setCurrentQuestion(question)
-    }
-
-    socket.on('question', handleQuestion)
-
-    return () => {
-      socket.off('question', handleQuestion)
-    }
-  }, [socket])
-
-  useEffect(() => {
     if (!socket || !roomCode) return
 
     const handlePlayerListUpdate = (playerList) => {
@@ -327,16 +314,17 @@ const Room = ({ socket }) => {
     const handleNextQuestion = (data) => {
       setUserScores(data.scores)
       setShowLeaderboard(true)
+      setTimeRemaining(5)
 
       setTimeout(() => {
         setShowSuccessConfetti(false)
         setCurrentQuestion(data.question)
-        setTimeRemaining(data.question.timeLimit / 1000)
+        setTimeRemaining(10) // Reset the timer
         setHasAnswered(false)
         setSelectedIndex(-1)
         setShowLeaderboard(false)
         setCurrentQuestionNumber(data.questionsAsked)
-      }, 10000)
+      }, 5000)
     }
 
     socket.on('nextQuestion', handleNextQuestion)
@@ -361,7 +349,8 @@ const Room = ({ socket }) => {
         setSelectedIndex(-1)
         setShowLeaderboard(false)
         setCurrentQuestionNumber(1)
-      }, 10000)
+        setTimeRemaining(0) // Reset the timer
+      }, 5000)
     }
 
     socket.on('endGame', handleGameEnd)
@@ -372,11 +361,6 @@ const Room = ({ socket }) => {
   }, [socket])
 
   useEffect(() => {
-    if (gameStarted && timeRemaining <= 0) {
-      setHasAnswered(true)
-      handleAnswer('no answer')
-    }
-
     if (timeRemaining <= 0) return
 
     const timer = setTimeout(() => {
@@ -414,7 +398,7 @@ const Room = ({ socket }) => {
                   )
                 : (
                   <div className={styles.waiting}>
-                    <h3>Väntar på att spelledaren ska starta spelet...</h3>
+                    <h3>Väntar på att spelledaren<br/>ska starta spelet...</h3>
                   </div>
                   )}
             </div>

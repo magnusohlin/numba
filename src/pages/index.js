@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/router'
+import Image from 'next/image'
 import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import PinInput from 'react-pin-input'
 import styles from '@/styles/Home.module.scss'
@@ -61,6 +62,9 @@ const Home = ({ socket }) => {
       <div className={styles.home}>
         <div className={styles.homeContent}>
           <div className={styles.header}>
+            <div className={styles.logo}>
+              <Image src="/numba.svg" alt="Numba" width={100} height={100} />
+            </div>
             <h3 className={styles.headerTop}>Välkommen till Numba</h3>
             <h3>Ett lärorikt mattequiz</h3>
           </div>
@@ -90,13 +94,13 @@ const Home = ({ socket }) => {
                         className={`${styles.input} ${worksans.className}`}
                         name="name"
                         type="text"
-                        placeholder=""
+                        placeholder="Skriv ditt smeknamn..."
                         value={playerName}
                         onChange={(e) => setPlayerName(e.target.value)}
                       />
                     </div>
                     <div className={styles.inputWrapper}>
-                      <label htmlFor="roomCode">Rumskod</label>
+                      <label htmlFor="roomCode">Ange rumskod</label>
                       <PinInput
                         length={4}
                         initialValue=""
@@ -135,7 +139,7 @@ const Home = ({ socket }) => {
                       <label htmlFor="name">Ditt smeknamn</label>
                       <input
                         type="text"
-                        placeholder="Enter your name"
+                        placeholder="Skriv ditt smeknamn..."
                         value={playerName}
                         className={`${styles.input} ${worksans.className}`}
                         onChange={(e) => setPlayerName(e.target.value)}

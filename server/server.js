@@ -120,6 +120,7 @@ const onStartGame = (socket, userId, roomCode, gameOptions) => {
 
       if (room.remainingTime <= 0) {
         clearInterval(room.intervalId)
+        onAnswer(socket, roomCode, userId, null, 0) // Trigger the onAnswer function to process the next question
       }
     }, 1000)
   }
@@ -176,7 +177,7 @@ const onAnswer = (socket, roomCode, userId, answer, remainingTime) => {
       room.currentQuestion = question // Update the current question for the room
 
       if (room.questionsAsked <= 10) {
-        room.remainingTime = 10000 // Reset the remaining time
+        room.remainingTime = 15000 // Reset the remaining time
 
         if (room.intervalId) clearInterval(room.intervalId) // Clear previous interval if it exists
 
@@ -186,6 +187,7 @@ const onAnswer = (socket, roomCode, userId, answer, remainingTime) => {
 
           if (room.remainingTime <= 0) {
             clearInterval(room.intervalId)
+            onAnswer(socket, roomCode, userId, null, 0) // Trigger the onAnswer function to process the next question
           }
         }, 1000)
 
