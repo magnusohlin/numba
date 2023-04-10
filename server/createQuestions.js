@@ -25,67 +25,55 @@ const generateDistractors = (answer, type, level) => {
     let distractor
     let iterationCount = 0
 
-    const adjustedRange = Math.max(
-      Math.floor(answer * 0.5),
-      baseRange,
-      answer + 1
-    )
+    const adjustedRange = Math.max(Math.floor(answer * 0.5), baseRange, answer + 1)
 
-    do {
-      iterationCount++
-
-      if (iterationCount > 20) {
-        break
-      }
-
-      switch (type) {
-        case 'addition':
-        case 'subtraction':
-          distractor =
-            answer +
-            (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
+    switch (type) {
+      case 'addition':
+      case 'subtraction':
+        do {
+          distractor = answer + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
           if (type === 'subtraction' && (answer === 0 || answer === 1)) {
-            distractor =
-              answer + Math.floor(Math.random() * (max - 1)) + 1
+            distractor = answer + Math.floor(Math.random() * (max - 1)) + 1
           }
-          break
-        case 'multiplication':
-          distractor = Math.round(
-            answer *
-              (1 +
-                (Math.floor(Math.random() * adjustedRange * 2) -
-                  adjustedRange) /
-                  10)
-          )
-          break
-        case 'division':
+          iterationCount++
+        } while (distractors.has(distractor) && iterationCount < 20)
+        break
+      case 'multiplication':
+        do {
+          distractor = Math.round(answer * (1 + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange) / 10))
+          iterationCount++
+        } while ((distractors.has(distractor) || distractor === answer) && iterationCount < 20)
+        break
+      case 'division':
+        do {
           const baseDistractor = Math.floor(Math.random() * max) + 1
-          distractor =
-            baseDistractor +
-            (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
-          break
-      }
-
-      if (!isWholeNumber(distractor)) {
-        distractor = Math.round(distractor)
-      }
-    } while (distractors.has(distractor) || distractor === answer)
-
-    if (iterationCount > 20 || (type === 'division' && !isWholeNumber(distractor))) {
-      break
+          distractor = baseDistractor + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
+          iterationCount++
+        } while (
+          (distractors.has(distractor) || distractor === answer || !isWholeNumber(distractor)) &&
+          iterationCount < 20
+        )
+        break
     }
 
+    // Break the loop and generate a random whole number if the iteration limit is reached
+    if (iterationCount >= 20) {
+      distractor = Math.floor(Math.random() * max) + 1
+    }
+
+    // Ensure distractor is within the valid range
     if (distractor < 1) {
       continue
     }
 
-    distractors.add(distractor)
-  }
+    // Check if the distractor is a whole number, if not, adjust it
+    if (!isWholeNumber(distractor)) {
+      distractor = Math.round(distractor)
+    }
 
-  while (distractors.size < 3) {
-    const randomWholeNumber = Math.floor(Math.random() * max) + 1
-    if (randomWholeNumber !== answer) {
-      distractors.add(randomWholeNumber)
+    // Check if the distractor is not equal to the answer
+    if (distractor !== answer) {
+      distractors.add(distractor)
     }
   }
 
