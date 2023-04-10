@@ -108,7 +108,7 @@ const Home = ({ socket }) => {
                         type="custom"
                         inputMode="number"
                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', ...worksans.style }}
-                        inputStyle={{ height: '120px', width: '80px', borderColor: '#000', borderWidth: '3px', fontSize: '96px', fontWeight: '800', ...worksans.style }}
+                        inputStyle={{ height: '120px', width: '80px', backgroundColor: '#000', borderColor: '#000', borderWidth: '3px', fontSize: '96px', fontWeight: '800', color: '#ffffff', borderRadius: '10px', ...worksans.style }}
                         inputFocusStyle={{ borderColor: 'var(--blue)' }}
                         autoSelect={true}
                         regexCriteria={/^[ A-Za-z0-9_@./#&+-]*$/}
