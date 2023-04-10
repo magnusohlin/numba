@@ -27,36 +27,36 @@ const generateDistractors = (answer, type, level) => {
 
     const adjustedRange = Math.max(Math.floor(answer * 0.5), baseRange, answer + 1)
 
-    switch (type) {
-      case 'addition':
-      case 'subtraction':
-        do {
+    do {
+      iterationCount++
+
+      switch (type) {
+        case 'addition':
+        case 'subtraction':
           distractor = answer + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
           if (type === 'subtraction' && (answer === 0 || answer === 1)) {
             distractor = answer + Math.floor(Math.random() * (max - 1)) + 1
           }
-          iterationCount++
-        } while (distractors.has(distractor) && iterationCount < 20)
-        break
-      case 'multiplication':
-        do {
+          break
+        case 'multiplication':
           distractor = Math.round(answer * (1 + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange) / 10))
-          iterationCount++
-        } while ((distractors.has(distractor) || distractor === answer) && iterationCount < 20)
-        break
-      case 'division':
-        do {
+          break
+        case 'division':
           const baseDistractor = Math.floor(Math.random() * max) + 1
           distractor = baseDistractor + (Math.floor(Math.random() * adjustedRange * 2) - adjustedRange)
-          iterationCount++
-        } while (
-          (distractors.has(distractor) || distractor === answer || !isWholeNumber(distractor)) &&
-          iterationCount < 20
-        )
-        break
-    }
+          break
+      }
 
-    // Break the loop and generate a random whole number if the iteration limit is reached
+      if (iterationCount >= 20) {
+        break
+      }
+
+      if (!isWholeNumber(distractor)) {
+        distractor = Math.round(distractor)
+      }
+    } while (distractors.has(distractor) || distractor === answer)
+
+    // Generate a random whole number if the iteration limit is reached
     if (iterationCount >= 20) {
       distractor = Math.floor(Math.random() * max) + 1
     }
@@ -100,13 +100,10 @@ const createQuestion = (type, level) => {
       answer = num1 + num2
       break
     case 'subtraction':
-      num1 = generateNumber(level)
-      num2 = generateNumber(level)
-
-      // Ensure num1 and num2 are not equal to avoid answer being 0
-      while (num1 === num2) {
+      do {
+        num1 = generateNumber(level)
         num2 = generateNumber(level)
-      }
+      } while (num1 === num2 || num1 < num2)
 
       question = `${num1} - ${num2}`
       answer = num1 - num2

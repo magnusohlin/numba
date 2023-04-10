@@ -204,7 +204,6 @@ const Room = ({ socket }) => {
       setShowSuccessConfetti(true)
     }
     // Notify the server that the user has answered the question
-    console.log(roomCode, userId, selectedAnswer, timeRemaining)
     socket.emit('answer', roomCode, userId, selectedAnswer, timeRemaining)
     setHasAnswered(true)
 
