@@ -51,9 +51,9 @@ export default function App ({ Component, pageProps }) {
     const serverUrl =
       window.location.hostname === 'localhost'
         ? 'http://localhost:3001'
-        : `http://${window.location.hostname}:3001`
+        : `https://${window.location.hostname}:3001`
 
-    const newSocket = io(serverUrl, {
+    const newSocket = io(serverUrl.replace('http', 'ws'), {
       query: { userId: userId || 'unknown' }
     })
     setSocket(newSocket)
