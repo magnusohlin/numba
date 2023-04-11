@@ -59,6 +59,7 @@ export default function App ({ Component, pageProps }) {
         query: { userId: userId || 'unknown' }
       }
     )
+    setSocket(newSocket)
     return () => newSocket.close()
   }, [])
 
