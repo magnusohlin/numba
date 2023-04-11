@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
+import Script from 'next/script'
 import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import PinInput from 'react-pin-input'
 import styles from '@/styles/Home.module.scss'
@@ -59,6 +60,16 @@ const Home = ({ socket }) => {
 
   return (
     <div className={styles.homeWrapper}>
+      <Script strategy="afterInteractive" src="https://www.googletagmanager.com/gtag/js?id=G-9N53K8K70C" />
+      <Script id="google-analytics" strategy="afterInteractive">
+      {`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-9N53K8K70C');
+      `}
+      </Script>
       <div className={styles.home}>
         <div className={styles.homeContent}>
           <div className={styles.header}>
